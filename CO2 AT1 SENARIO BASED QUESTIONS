@@ -1,0 +1,321 @@
+QUESTION 1 := 
+
+ CODE := 
+           import java.util.*;
+
+class Movie
+{
+    int year;
+    String title;
+    float rating;
+
+    void accept()
+    {
+        Scanner sc = new Scanner(System.in);
+
+        System.out.print("Enter year of release: ");
+        year = sc.nextInt();
+        sc.nextLine();
+
+        System.out.print("Enter movie title: ");
+        title = sc.nextLine();
+
+        System.out.print("Enter rating: ");
+        rating = sc.nextFloat();
+    }
+
+    void display()
+    {
+        System.out.println("\nMovie Title: " + title);
+
+        if (rating >= 0.0 && rating <= 2.0)
+            System.out.println("Flop");
+        else if (rating <= 3.4)
+            System.out.println("Semi-hit");
+        else if (rating <= 4.5)
+            System.out.println("Hit");
+        else if (rating <= 5.0)
+            System.out.println("Super Hit");
+        else
+            System.out.println("Invalid rating");
+    }
+
+    public static void main(String args[])
+    {
+        Movie obj = new Movie();
+        obj.accept();
+        obj.display();
+    }
+}
+OUTPUT :=
+          Enter year of release: 2025
+Enter movie title: Sky Force
+Enter rating: 4.2
+
+Movie Title: Sky Force
+Hit
+
+
+QUESTION :- 2
+
+CODE:- 
+        import java.util.*;
+
+class BookFair
+{
+    String Bname;
+    double price;
+
+    void Input()
+    {
+        Scanner sc = new Scanner(System.in);
+
+        System.out.print("Enter name of the book: ");
+        Bname = sc.nextLine();
+
+        System.out.print("Enter price of the book: ");
+        price = sc.nextDouble();
+    }
+
+    void calculate()
+    {
+        if (price <= 1000)
+            price = price - (price * 2 / 100);
+        else if (price <= 3000)
+            price = price - (price * 10 / 100);
+        else
+            price = price - (price * 15 / 100);
+    }
+
+    void display()
+    {
+        System.out.println("\nBook Name: " + Bname);
+        System.out.println("Price after discount: Rs. " + price);
+    }
+
+    public static void main(String args[])
+    {
+        BookFair obj = new BookFair();
+
+        obj.Input();
+        obj.calculate();
+        obj.display();
+    }
+
+}
+ OUTPUT:- 
+           Enter name of the book: Java Programming
+Enter price of the book: 2500
+
+Book Name: Java Programming
+Price after discount: Rs. 2250.0
+
+
+QUESTION :- 3
+     CODE:- 
+               import java.util.*;
+
+class ElectricBill
+{
+    String n;
+    int units;
+    double bill;
+
+    void accept()
+    {
+        Scanner sc = new Scanner(System.in);
+
+        System.out.print("Enter name of customer: ");
+        n = sc.nextLine();
+
+        System.out.print("Enter number of units consumed: ");
+        units = sc.nextInt();
+    }
+
+    void calculate()
+    {
+        if (units <= 100)
+        {
+            bill = units * 2.00;
+        }
+        else if (units <= 300)
+        {
+            bill = (100 * 2.00) + ((units - 100) * 3.00);
+        }
+        else
+        {
+            bill = (100 * 2.00) + (200 * 3.00)
+                   + ((units - 300) * 5.00);
+
+            bill = bill + (bill * 2.5 / 100);
+        }
+    }
+
+    void print()
+    {
+        System.out.println("\nName of the customer: " + n);
+        System.out.println("Number of units consumed: " + units);
+        System.out.println("Bill amount: Rs. " + bill);
+    }
+
+    public static void main(String args[])
+    {
+        ElectricBill obj = new ElectricBill();
+
+        obj.accept();
+        obj.calculate();
+        obj.print();
+    }
+}
+
+OUTPUT:- 
+          Name of the customer: Rahul
+Number of units consumed: 350
+Bill amount: Rs. 1076.25
+
+
+QUESTION :- 4 
+
+CODE :- 
+          import java.util.*;
+
+class RailwayTicket
+{
+    String name;
+    String coach;
+    long mobno;
+    int amt;
+    int totalamt;
+
+    void accept()
+    {
+        Scanner sc = new Scanner(System.in);
+
+        System.out.print("Enter name: ");
+        name = sc.nextLine();
+
+        System.out.print("Enter coach: ");
+        coach = sc.nextLine();
+
+        System.out.print("Enter mobile number: ");
+        mobno = sc.nextLong();
+
+        System.out.print("Enter basic ticket amount: ");
+        amt = sc.nextInt();
+    }
+
+    void update()
+    {
+        if (coach.equalsIgnoreCase("First_AC"))
+            totalamt = amt + 700;
+        else if (coach.equalsIgnoreCase("Second_AC"))
+            totalamt = amt + 500;
+        else if (coach.equalsIgnoreCase("Third_AC"))
+            totalamt = amt + 250;
+        else if (coach.equalsIgnoreCase("sleeper"))
+            totalamt = amt;
+        else
+            totalamt = amt;
+    }
+
+    void display()
+    {
+        System.out.println("\nName: " + name);
+        System.out.println("Coach: " + coach);
+        System.out.println("Mobile Number: " + mobno);
+        System.out.println("Total Amount: Rs. " + totalamt);
+    }
+
+    public static void main(String args[])
+    {
+        RailwayTicket obj = new RailwayTicket();
+
+        obj.accept();
+        obj.update();
+        obj.display();
+    }
+}
+  OUTPUT:-
+            Enter name: Amit Kumar
+Enter coach: Third_AC
+Enter mobile number: 9876543210
+Enter basic ticket amount: 1200
+
+Name: Amit Kumar
+Coach: Third_AC
+Mobile Number: 9876543210
+Total Amount: Rs. 1450
+
+QUESTION :- 5
+
+CODE :- 
+
+          import java.util.*;
+
+class ShowRoom
+{
+    String name;
+    long mobno;
+    double cost;
+    double dis;
+    double amount;
+
+    void input()
+    {
+        Scanner sc = new Scanner(System.in);
+
+        System.out.print("Enter customer name: ");
+        name = sc.nextLine();
+
+        System.out.print("Enter mobile number: ");
+        mobno = sc.nextLong();
+
+        System.out.print("Enter cost of items: ");
+        cost = sc.nextDouble();
+    }
+
+    void calculate()
+    {
+        if (cost <= 10000)
+            dis = cost * 5 / 100;
+        else if (cost <= 20000)
+            dis = cost * 10 / 100;
+        else if (cost <= 35000)
+            dis = cost * 15 / 100;
+        else
+            dis = cost * 20 / 100;
+
+        amount = cost - dis;
+    }
+
+    void display()
+    {
+        System.out.println("\nCustomer Name: " + name);
+        System.out.println("Mobile Number: " + mobno);
+        System.out.println("Amount to be paid: Rs. " + amount);
+    }
+
+    public static void main(String args[])
+    {
+        ShowRoom obj = new ShowRoom();
+
+        obj.input();
+        obj.calculate();
+        obj.display();
+    }
+}
+
+
+OUTPUT:- 
+          Enter customer name: Priya
+Enter mobile number: 9123456789
+Enter cost of items: 30000
+
+Customer Name: Priya
+Mobile Number: 9123456789
+Amount to be paid: Rs. 25500.0
+
+
+
+        
+           

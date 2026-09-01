@@ -1,0 +1,1321 @@
+#include <iostream>
+#include <iomanip>
+#include <string>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+// ============================================================
+// PATIENT CLASS
+// ============================================================
+
+class Patient {
+private:
+    int patientId;
+    string name;
+    int age;
+    string condition;
+
+public:
+
+    // Default constructor
+    Patient()
+        : patientId(0), name("Unknown"),
+          age(0), condition("Unknown") {}
+
+    // Parameterized constructor
+    Patient(int id, string n, int a, string c)
+        : patientId(id), name(n),
+          age(a), condition(c) {}
+
+    // Copy constructor
+    Patient(const Patient& p)
+        : patientId(p.patientId),
+          name(p.name),
+          age(p.age),
+          condition(p.condition) {}
+
+    int getId() const {
+        return patientId;
+    }
+
+    string getName() const {
+        return name;
+    }
+
+    void display() const {
+        cout << left
+             << setw(10) << patientId
+             << setw(20) << name
+             << setw(8) << age
+             << setw(25) << condition
+             << endl;
+    }
+};
+
+
+// ============================================================
+// ABSTRACT BASE CLASS
+// RESOURCE
+// ============================================================
+
+class Resource {
+protected:
+    int resourceId;
+    string resourceName;
+    bool available;
+
+    static int totalResources;
+
+public:
+
+    Resource()
+        : resourceId(0),
+          resourceName("Unknown"),
+          available(true) {
+        totalResources++;
+    }
+
+    Resource(int id, string name)
+        : resourceId(id),
+          resourceName(name),
+          available(true) {
+        totalResources++;
+    }
+
+    virtual ~Resource() {
+        totalResources--;
+    }
+
+    int getId() const {
+        return resourceId;
+    }
+
+    bool isAvailable() const {
+        return available;
+    }
+
+    void setAvailable(bool status) {
+        available = status;
+    }
+
+    virtual void display() const = 0;
+
+    virtual string getType() const = 0;
+
+    virtual int getCapacity() const = 0;
+
+    static int getTotalResources() {
+        return totalResources;
+    }
+};
+
+int Resource::totalResources = 0;
+
+
+// ============================================================
+// AMBULANCE
+// ============================================================
+
+class Ambulance : public Resource {
+private:
+    string ambulanceType;
+    int patientCapacity;
+
+public:
+
+    Ambulance()
+        : Resource(),
+          ambulanceType("Basic"),
+          patientCapacity(2) {}
+
+    Ambulance(int id, string type, int capacity)
+        : Resource(id, "Ambulance"),
+          ambulanceType(type),
+          patientCapacity(capacity) {}
+
+    void display() const override {
+
+        cout << left
+             << setw(10) << resourceId
+             << setw(18) << "Ambulance"
+             << setw(18) << ambulanceType
+             << setw(12) << patientCapacity
+             << setw(15)
+             << (available ? "Available" : "Dispatched")
+             << endl;
+    }
+
+    string getType() const override {
+        return "Ambulance";
+    }
+
+    int getCapacity() const override {
+        return patientCapacity;
+    }
+};
+
+
+// ============================================================
+// EMERGENCY BED
+// ============================================================
+
+class EmergencyBed : public Resource {
+private:
+    string category;
+
+public:
+
+    EmergencyBed()
+        : Resource(),
+          category("General") {}
+
+    EmergencyBed(int id, string c)
+        : Resource(id, "Emergency Bed"),
+          category(c) {}
+
+    void display() const override {
+
+        cout << left
+             << setw(10) << resourceId
+             << setw(18) << "Emergency Bed"
+             << setw(18) << category
+             << setw(12) << 1
+             << setw(15)
+             << (available ? "Available" : "Occupied")
+             << endl;
+    }
+
+    string getType() const override {
+        return "Emergency Bed";
+    }
+
+    int getCapacity() const override {
+        return 1;
+    }
+};
+
+
+// ============================================================
+// MEDICAL EQUIPMENT
+// ============================================================
+
+class MedicalEquipment : public Resource {
+private:
+    string equipmentType;
+
+public:
+
+    MedicalEquipment()
+        : Resource(),
+          equipmentType("Monitor") {}
+
+    MedicalEquipment(int id, string type)
+        : Resource(id, "Equipment"),
+          equipmentType(type) {}
+
+    void display() const override {
+
+        cout << left
+             << setw(10) << resourceId
+             << setw(18) << "Equipment"
+             << setw(18) << equipmentType
+             << setw(12) << 1
+             << setw(15)
+             << (available ? "Available" : "In Use")
+             << endl;
+    }
+
+    string getType() const override {
+        return "Equipment";
+    }
+
+    int getCapacity() const override {
+        return 1;
+    }
+};
+
+
+// ============================================================
+// RESPONSE TEAM
+// ============================================================
+
+class ResponseTeam : public Resource {
+private:
+    string specialization;
+    int teamSize;
+
+public:
+
+    ResponseTeam()
+        : Resource(),
+          specialization("General"),
+          teamSize(3) {}
+
+    ResponseTeam(int id, string spec, int size)
+        : Resource(id, "Response Team"),
+          specialization(spec),
+          teamSize(size) {}
+
+    void display() const override {
+
+        cout << left
+             << setw(10) << resourceId
+             << setw(18) << "Response Team"
+             << setw(18) << specialization
+             << setw(12) << teamSize
+             << setw(15)
+             << (available ? "Available" : "Busy")
+             << endl;
+    }
+
+    string getType() const override {
+        return "Response Team";
+    }
+
+    int getCapacity() const override {
+        return teamSize;
+    }
+};
+
+
+// ============================================================
+// EMERGENCY CASE
+// ============================================================
+
+class EmergencyCase {
+private:
+    int caseId;
+    int patientId;
+    string emergencyType;
+    int severity;
+    int waitingTime;
+    bool active;
+
+public:
+
+    // Default constructor
+    EmergencyCase()
+        : caseId(0),
+          patientId(0),
+          emergencyType("Unknown"),
+          severity(1),
+          waitingTime(0),
+          active(false) {}
+
+    // Parameterized constructor
+    EmergencyCase(int cid,
+                  int pid,
+                  string type,
+                  int sev,
+                  int wait)
+        : caseId(cid),
+          patientId(pid),
+          emergencyType(type),
+          severity(sev),
+          waitingTime(wait),
+          active(true) {}
+
+    // Copy constructor
+    EmergencyCase(const EmergencyCase& e)
+        : caseId(e.caseId),
+          patientId(e.patientId),
+          emergencyType(e.emergencyType),
+          severity(e.severity),
+          waitingTime(e.waitingTime),
+          active(e.active) {}
+
+    int getCaseId() const {
+        return caseId;
+    }
+
+    int getPatientId() const {
+        return patientId;
+    }
+
+    int getSeverity() const {
+        return severity;
+    }
+
+    int getPriority() const {
+
+        return (severity * 10) + waitingTime;
+    }
+
+    bool isActive() const {
+        return active;
+    }
+
+    void closeCase() {
+        active = false;
+    }
+
+    void increaseWaitingTime(int minutes) {
+        waitingTime += minutes;
+    }
+
+    // Operator >
+    bool operator>(const EmergencyCase& other) const {
+
+        return getPriority() > other.getPriority();
+    }
+
+    // Operator <
+    bool operator<(const EmergencyCase& other) const {
+
+        return getPriority() < other.getPriority();
+    }
+
+    void display() const {
+
+        cout << left
+             << setw(10) << caseId
+             << setw(12) << patientId
+             << setw(20) << emergencyType
+             << setw(10) << severity
+             << setw(12) << waitingTime
+             << setw(12) << getPriority()
+             << setw(12)
+             << (active ? "Active" : "Closed")
+             << endl;
+    }
+};
+
+
+// ============================================================
+// SMART EMERGENCY COMMAND CENTER
+// ============================================================
+
+class CommandCenter {
+
+private:
+
+    // Arrays of objects
+    Patient patients[100];
+    EmergencyCase emergencyCases[100];
+
+    int patientCount;
+    int caseCount;
+
+    // Base-class pointers
+    vector<Resource*> resources;
+
+    static int activeCases;
+
+public:
+
+    // Constructor
+    CommandCenter()
+        : patientCount(0),
+          caseCount(0) {
+
+        // Ambulances
+        resources.push_back(
+            new Ambulance(101, "Advanced", 4));
+
+        resources.push_back(
+            new Ambulance(102, "Basic", 2));
+
+        // Emergency Beds
+        resources.push_back(
+            new EmergencyBed(201, "ICU"));
+
+        resources.push_back(
+            new EmergencyBed(202, "General"));
+
+        resources.push_back(
+            new EmergencyBed(203, "Trauma"));
+
+        // Equipment
+        resources.push_back(
+            new MedicalEquipment(301, "Ventilator"));
+
+        resources.push_back(
+            new MedicalEquipment(302, "ECG"));
+
+        resources.push_back(
+            new MedicalEquipment(303, "Patient Monitor"));
+
+        // Response Teams
+        resources.push_back(
+            new ResponseTeam(401, "Trauma", 5));
+
+        resources.push_back(
+            new ResponseTeam(402, "Cardiac", 4));
+    }
+
+
+    // Destructor
+    ~CommandCenter() {
+
+        for (Resource* resource : resources) {
+            delete resource;
+        }
+
+        resources.clear();
+
+        cout << "\nAll dynamic resources released.\n";
+    }
+
+
+    // ========================================================
+    // REGISTER PATIENT
+    // ========================================================
+
+    void registerPatient() {
+
+        if (patientCount >= 100) {
+
+            cout << "\nPatient storage is full.\n";
+            return;
+        }
+
+        int id;
+        int age;
+
+        string name;
+        string condition;
+
+        cout << "\nEnter Patient ID: ";
+        cin >> id;
+
+        cin.ignore();
+
+        cout << "Enter Patient Name: ";
+        getline(cin, name);
+
+        cout << "Enter Age: ";
+        cin >> age;
+
+        cin.ignore();
+
+        cout << "Enter Condition: ";
+        getline(cin, condition);
+
+        patients[patientCount] =
+            Patient(id, name, age, condition);
+
+        patientCount++;
+
+        cout << "\nPatient registered successfully.\n";
+    }
+
+
+    // ========================================================
+    // DISPLAY PATIENTS
+    // ========================================================
+
+    void displayPatients() const {
+
+        if (patientCount == 0) {
+
+            cout << "\nNo patients registered.\n";
+            return;
+        }
+
+        cout << "\n================ PATIENTS ================\n";
+
+        cout << left
+             << setw(10) << "ID"
+             << setw(20) << "Name"
+             << setw(8) << "Age"
+             << setw(25) << "Condition"
+             << endl;
+
+        cout << string(63, '-') << endl;
+
+        for (int i = 0; i < patientCount; i++) {
+
+            patients[i].display();
+        }
+    }
+
+
+    // ========================================================
+    // CREATE EMERGENCY CASE
+    // ========================================================
+
+    void createCase() {
+
+        if (caseCount >= 100) {
+
+            cout << "\nEmergency case storage is full.\n";
+            return;
+        }
+
+        if (patientCount == 0) {
+
+            cout << "\nRegister a patient first.\n";
+            return;
+        }
+
+        int caseId;
+        int patientId;
+        int severity;
+        int waitingTime;
+
+        string type;
+
+        cout << "\nEnter Case ID: ";
+        cin >> caseId;
+
+        cout << "Enter Patient ID: ";
+        cin >> patientId;
+
+        bool found = false;
+
+        for (int i = 0; i < patientCount; i++) {
+
+            if (patients[i].getId() == patientId) {
+
+                found = true;
+                break;
+            }
+        }
+
+        if (!found) {
+
+            cout << "\nPatient not found.\n";
+            return;
+        }
+
+        cin.ignore();
+
+        cout << "Enter Emergency Type: ";
+        getline(cin, type);
+
+        cout << "Enter Severity (1-10): ";
+        cin >> severity;
+
+        if (severity < 1)
+            severity = 1;
+
+        if (severity > 10)
+            severity = 10;
+
+        cout << "Enter Waiting Time (minutes): ";
+        cin >> waitingTime;
+
+        if (waitingTime < 0)
+            waitingTime = 0;
+
+        emergencyCases[caseCount] =
+            EmergencyCase(
+                caseId,
+                patientId,
+                type,
+                severity,
+                waitingTime
+            );
+
+        caseCount++;
+        activeCases++;
+
+        cout << "\nEmergency case created successfully.";
+
+        cout << "\nPriority Score: "
+             << emergencyCases[caseCount - 1].getPriority()
+             << endl;
+    }
+
+
+    // ========================================================
+    // SORT AND DISPLAY EMERGENCY QUEUE
+    // ========================================================
+
+    void displayEmergencyQueue() const {
+
+        if (caseCount == 0) {
+
+            cout << "\nNo emergency cases.\n";
+            return;
+        }
+
+        vector<EmergencyCase> queue;
+
+        for (int i = 0; i < caseCount; i++) {
+
+            if (emergencyCases[i].isActive()) {
+
+                queue.push_back(emergencyCases[i]);
+            }
+        }
+
+        sort(queue.begin(),
+             queue.end(),
+             [](const EmergencyCase& a,
+                const EmergencyCase& b) {
+
+                 return a > b;
+             });
+
+        cout << "\n=============== EMERGENCY QUEUE ===============\n";
+
+        cout << left
+             << setw(10) << "Case ID"
+             << setw(12) << "Patient"
+             << setw(20) << "Emergency"
+             << setw(10) << "Severity"
+             << setw(12) << "Waiting"
+             << setw(12) << "Priority"
+             << setw(12) << "Status"
+             << endl;
+
+        cout << string(88, '-') << endl;
+
+        for (const EmergencyCase& e : queue) {
+
+            e.display();
+        }
+    }
+
+
+    // ========================================================
+    // FIND HIGHEST PRIORITY CASE
+    // ========================================================
+
+    int getHighestPriorityCase() const {
+
+        int bestIndex = -1;
+
+        for (int i = 0; i < caseCount; i++) {
+
+            if (!emergencyCases[i].isActive())
+                continue;
+
+            if (bestIndex == -1 ||
+                emergencyCases[i] > emergencyCases[bestIndex]) {
+
+                bestIndex = i;
+            }
+        }
+
+        return bestIndex;
+    }
+
+
+    // ========================================================
+    // DISPATCH NEXT EMERGENCY
+    // ========================================================
+
+    void dispatchNextEmergency() {
+
+        int index = getHighestPriorityCase();
+
+        if (index == -1) {
+
+            cout << "\nNo active emergency cases.\n";
+            return;
+        }
+
+        cout << "\nHighest Priority Case: "
+             << emergencyCases[index].getCaseId()
+             << endl;
+
+        cout << "Priority Score: "
+             << emergencyCases[index].getPriority()
+             << endl;
+
+        for (Resource* resource : resources) {
+
+            if (resource->getType() == "Ambulance" &&
+                resource->isAvailable()) {
+
+                resource->setAvailable(false);
+
+                cout << "\nAmbulance dispatched successfully.\n";
+
+                cout << "Ambulance ID: "
+                     << resource->getId()
+                     << endl;
+
+                return;
+            }
+        }
+
+        cout << "\nNo ambulance currently available.\n";
+    }
+
+
+    // ========================================================
+    // ASSIGN BED
+    // ========================================================
+
+    void assignBed() {
+
+        int caseId;
+
+        cout << "\nEnter Case ID: ";
+        cin >> caseId;
+
+        bool caseFound = false;
+
+        for (int i = 0; i < caseCount; i++) {
+
+            if (emergencyCases[i].getCaseId() == caseId &&
+                emergencyCases[i].isActive()) {
+
+                caseFound = true;
+                break;
+            }
+        }
+
+        if (!caseFound) {
+
+            cout << "\nActive case not found.\n";
+            return;
+        }
+
+        string requiredBed;
+
+        cout << "\nSelect Bed Category\n";
+        cout << "1. ICU\n";
+        cout << "2. General\n";
+        cout << "3. Trauma\n";
+
+        int choice;
+
+        cout << "Enter choice: ";
+        cin >> choice;
+
+        if (choice == 1)
+            requiredBed = "ICU";
+        else if (choice == 2)
+            requiredBed = "General";
+        else if (choice == 3)
+            requiredBed = "Trauma";
+        else {
+
+            cout << "\nInvalid choice.\n";
+            return;
+        }
+
+        for (Resource* resource : resources) {
+
+            if (resource->getType() == "Emergency Bed" &&
+                resource->isAvailable()) {
+
+                resource->setAvailable(false);
+
+                cout << "\nEmergency bed assigned.\n";
+                cout << "Bed ID: "
+                     << resource->getId()
+                     << endl;
+
+                cout << "Category: "
+                     << requiredBed
+                     << endl;
+
+                return;
+            }
+        }
+
+        cout << "\nNo emergency bed available.\n";
+    }
+
+
+    // ========================================================
+    // ASSIGN EQUIPMENT
+    // ========================================================
+
+    void assignEquipment() {
+
+        int choice;
+
+        cout << "\nSelect Equipment\n";
+        cout << "1. Ventilator\n";
+        cout << "2. ECG\n";
+        cout << "3. Patient Monitor\n";
+
+        cout << "Enter choice: ";
+        cin >> choice;
+
+        string type;
+
+        if (choice == 1)
+            type = "Ventilator";
+        else if (choice == 2)
+            type = "ECG";
+        else if (choice == 3)
+            type = "Patient Monitor";
+        else {
+
+            cout << "\nInvalid choice.\n";
+            return;
+        }
+
+        for (Resource* resource : resources) {
+
+            if (resource->getType() == "Equipment" &&
+                resource->isAvailable()) {
+
+                resource->setAvailable(false);
+
+                cout << "\nEquipment assigned successfully.\n";
+
+                cout << "Equipment ID: "
+                     << resource->getId()
+                     << endl;
+
+                cout << "Equipment: "
+                     << type
+                     << endl;
+
+                return;
+            }
+        }
+
+        cout << "\nRequested equipment unavailable.\n";
+    }
+
+
+    // ========================================================
+    // ASSIGN RESPONSE TEAM
+    // ========================================================
+
+    void assignResponseTeam() {
+
+        string specialization;
+
+        cout << "\nEnter Team Specialization:\n";
+        cout << "1. Trauma\n";
+        cout << "2. Cardiac\n";
+
+        int choice;
+
+        cout << "Choice: ";
+        cin >> choice;
+
+        if (choice == 1)
+            specialization = "Trauma";
+        else if (choice == 2)
+            specialization = "Cardiac";
+        else {
+
+            cout << "\nInvalid choice.\n";
+            return;
+        }
+
+        for (Resource* resource : resources) {
+
+            if (resource->getType() == "Response Team" &&
+                resource->isAvailable()) {
+
+                resource->setAvailable(false);
+
+                cout << "\nResponse team assigned.\n";
+
+                cout << "Team ID: "
+                     << resource->getId()
+                     << endl;
+
+                cout << "Specialization: "
+                     << specialization
+                     << endl;
+
+                return;
+            }
+        }
+
+        cout << "\nNo response team available.\n";
+    }
+
+
+    // ========================================================
+    // RELEASE RESOURCES
+    // ========================================================
+
+    void releaseResources() {
+
+        for (Resource* resource : resources) {
+
+            if (!resource->isAvailable()) {
+
+                resource->setAvailable(true);
+            }
+        }
+
+        cout << "\nAll occupied resources released.\n";
+    }
+
+
+    // ========================================================
+    // UPDATE PRIORITY
+    // ========================================================
+
+    void updatePriority() {
+
+        int caseId;
+        int additionalWaiting;
+
+        cout << "\nEnter Case ID: ";
+        cin >> caseId;
+
+        cout << "Enter additional waiting time: ";
+        cin >> additionalWaiting;
+
+        for (int i = 0; i < caseCount; i++) {
+
+            if (emergencyCases[i].getCaseId() == caseId &&
+                emergencyCases[i].isActive()) {
+
+                emergencyCases[i]
+                    .increaseWaitingTime(additionalWaiting);
+
+                cout << "\nPriority updated.\n";
+
+                cout << "New Priority: "
+                     << emergencyCases[i].getPriority()
+                     << endl;
+
+                return;
+            }
+        }
+
+        cout << "\nActive case not found.\n";
+    }
+
+
+    // ========================================================
+    // RESOURCE DASHBOARD
+    // ========================================================
+
+    void resourceDashboard() const {
+
+        int available = 0;
+        int occupied = 0;
+
+        cout << "\n=============== RESOURCE DASHBOARD ===============\n";
+
+        cout << left
+             << setw(10) << "ID"
+             << setw(18) << "Type"
+             << setw(18) << "Category"
+             << setw(12) << "Capacity"
+             << setw(15) << "Status"
+             << endl;
+
+        cout << string(73, '-') << endl;
+
+        // Runtime polymorphism
+        for (Resource* resource : resources) {
+
+            resource->display();
+
+            if (resource->isAvailable())
+                available++;
+            else
+                occupied++;
+        }
+
+        double utilization =
+            (static_cast<double>(occupied)
+             / resources.size()) * 100.0;
+
+        cout << "\nTotal Resources : "
+             << resources.size()
+             << endl;
+
+        cout << "Available       : "
+             << available
+             << endl;
+
+        cout << "Occupied        : "
+             << occupied
+             << endl;
+
+        cout << fixed << setprecision(2);
+
+        cout << "Utilization     : "
+             << utilization
+             << "%"
+             << endl;
+    }
+
+
+    // ========================================================
+    // COMPARE TWO CASES
+    // ========================================================
+
+    void compareCases() const {
+
+        if (caseCount < 2) {
+
+            cout << "\nAt least two cases required.\n";
+            return;
+        }
+
+        int id1;
+        int id2;
+
+        cout << "\nEnter First Case ID: ";
+        cin >> id1;
+
+        cout << "Enter Second Case ID: ";
+        cin >> id2;
+
+        int first = -1;
+        int second = -1;
+
+        for (int i = 0; i < caseCount; i++) {
+
+            if (emergencyCases[i].getCaseId() == id1)
+                first = i;
+
+            if (emergencyCases[i].getCaseId() == id2)
+                second = i;
+        }
+
+        if (first == -1 || second == -1) {
+
+            cout << "\nCase not found.\n";
+            return;
+        }
+
+        cout << "\nCase " << id1
+             << " Priority = "
+             << emergencyCases[first].getPriority()
+             << endl;
+
+        cout << "Case " << id2
+             << " Priority = "
+             << emergencyCases[second].getPriority()
+             << endl;
+
+        if (emergencyCases[first] >
+            emergencyCases[second]) {
+
+            cout << "\nCase " << id1
+                 << " has higher priority.\n";
+        }
+        else if (emergencyCases[second] >
+                 emergencyCases[first]) {
+
+            cout << "\nCase " << id2
+                 << " has higher priority.\n";
+        }
+        else {
+
+            cout << "\nBoth cases have equal priority.\n";
+        }
+    }
+
+
+    // ========================================================
+    // CLOSE EMERGENCY CASE
+    // ========================================================
+
+    void closeCase() {
+
+        int id;
+
+        cout << "\nEnter Case ID: ";
+        cin >> id;
+
+        for (int i = 0; i < caseCount; i++) {
+
+            if (emergencyCases[i].getCaseId() == id &&
+                emergencyCases[i].isActive()) {
+
+                emergencyCases[i].closeCase();
+
+                if (activeCases > 0)
+                    activeCases--;
+
+                cout << "\nEmergency case closed successfully.\n";
+
+                return;
+            }
+        }
+
+        cout << "\nActive case not found.\n";
+    }
+
+
+    // ========================================================
+    // COMMAND CENTER REPORT
+    // ========================================================
+
+    void generateReport() const {
+
+        int available = 0;
+
+        for (Resource* resource : resources) {
+
+            if (resource->isAvailable())
+                available++;
+        }
+
+        cout << "\n\n";
+        cout << "====================================================\n";
+        cout << "       SMART EMERGENCY COMMAND CENTER REPORT\n";
+        cout << "====================================================\n";
+
+        cout << "\nTotal Patients       : "
+             << patientCount
+             << endl;
+
+        cout << "Total Emergency Cases: "
+             << caseCount
+             << endl;
+
+        cout << "Active Cases         : "
+             << activeCases
+             << endl;
+
+        cout << "Total Resources      : "
+             << Resource::getTotalResources()
+             << endl;
+
+        cout << "Available Resources  : "
+             << available
+             << endl;
+
+        cout << "\n--------------- PATIENTS ----------------\n";
+
+        for (int i = 0; i < patientCount; i++) {
+
+            patients[i].display();
+        }
+
+        cout << "\n--------------- EMERGENCY CASES ------------\n";
+
+        for (int i = 0; i < caseCount; i++) {
+
+            emergencyCases[i].display();
+        }
+
+        cout << "\n--------------- RESOURCES ------------------\n";
+
+        for (Resource* resource : resources) {
+
+            resource->display();
+        }
+
+        cout << "\n====================================================\n";
+    }
+
+
+    // ========================================================
+    // MENU
+    // ========================================================
+
+    void run() {
+
+        int choice;
+
+        do {
+
+            cout << "\n\n";
+            cout << "╔══════════════════════════════════════════════╗\n";
+            cout << "║       SMART EMERGENCY COMMAND CENTER         ║\n";
+            cout << "╠══════════════════════════════════════════════╣\n";
+            cout << "║ 1. Register Emergency Patient                ║\n";
+            cout << "║ 2. Create Emergency Case                     ║\n";
+            cout << "║ 3. View Emergency Queue                      ║\n";
+            cout << "║ 4. Dispatch Next Emergency                   ║\n";
+            cout << "║ 5. Assign Emergency Bed                      ║\n";
+            cout << "║ 6. Assign Medical Equipment                  ║\n";
+            cout << "║ 7. Assign Response Team                      ║\n";
+            cout << "║ 8. Release Resources                         ║\n";
+            cout << "║ 9. Update Emergency Priority                 ║\n";
+            cout << "║ 10. View Resource Dashboard                  ║\n";
+            cout << "║ 11. Compare Emergency Cases                 ║\n";
+            cout << "║ 12. Close Emergency Case                     ║\n";
+            cout << "║ 13. Generate Command Center Report           ║\n";
+            cout << "║ 14. Exit                                     ║\n";
+            cout << "╚══════════════════════════════════════════════╝\n";
+
+            cout << "\nEnter your choice: ";
+            cin >> choice;
+
+            switch (choice) {
+
+                case 1:
+                    registerPatient();
+                    break;
+
+                case 2:
+                    createCase();
+                    break;
+
+                case 3:
+                    displayEmergencyQueue();
+                    break;
+
+                case 4:
+                    dispatchNextEmergency();
+                    break;
+
+                case 5:
+                    assignBed();
+                    break;
+
+                case 6:
+                    assignEquipment();
+                    break;
+
+                case 7:
+                    assignResponseTeam();
+                    break;
+
+                case 8:
+                    releaseResources();
+                    break;
+
+                case 9:
+                    updatePriority();
+                    break;
+
+                case 10:
+                    resourceDashboard();
+                    break;
+
+                case 11:
+                    compareCases();
+                    break;
+
+                case 12:
+                    closeCase();
+                    break;
+
+                case 13:
+                    generateReport();
+                    break;
+
+                case 14:
+                    cout << "\nShutting down Command Center...\n";
+                    break;
+
+                default:
+                    cout << "\nInvalid choice. Please try again.\n";
+            }
+
+        } while (choice != 14);
+    }
+};
+
+
+// Static member
+int CommandCenter::activeCases = 0;
+
+
+// ============================================================
+// MAIN
+// ============================================================
+
+int main() {
+
+    cout << "\n";
+    cout << "***********************************************\n";
+    cout << "* SMART EMERGENCY COMMAND CENTER              *\n";
+    cout << "* C++ OBJECT ORIENTED APPLICATION             *\n";
+    cout << "***********************************************\n";
+
+    CommandCenter center;
+
+    center.run();
+
+    return 0;
+}
